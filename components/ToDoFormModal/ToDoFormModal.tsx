@@ -22,7 +22,6 @@ import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
 interface ToDoFormProps extends ModalProps {
   columnId: number;
   card?: CardType;
-  getCards: (id?: number) => void;
 }
 
 const INITIAL_MEMBER_VALUE = {
@@ -32,13 +31,7 @@ const INITIAL_MEMBER_VALUE = {
   userId: 0,
 };
 
-export default function ToDoFormModal({
-  isOpen,
-  onClose,
-  columnId,
-  card,
-  getCards,
-}: ToDoFormProps) {
+export default function ToDoFormModal({ isOpen, onClose, columnId, card }: ToDoFormProps) {
   const [dashboardMembers, setDashboardMembers] = useState<Member[]>([INITIAL_MEMBER_VALUE]);
   const [columnsName, setColumnsName] = useState<ColumnsType[]>([{ id: 0, title: '' }]);
 
@@ -56,7 +49,7 @@ export default function ToDoFormModal({
     handleImageChange,
     handleTagsChange,
     handleToDoSubmit,
-  } = useToDoData(columnId, dashboardId, onClose, getCards, card);
+  } = useToDoData(columnId, dashboardId, onClose, card);
 
   const createOrUpdate = card?.id ? '수정' : '생성';
 

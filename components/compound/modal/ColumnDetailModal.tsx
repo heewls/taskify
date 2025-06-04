@@ -21,6 +21,7 @@ import EXTERNAL_API from '@/constants/api/external';
 import Comment from '@/components/Comment/Comment';
 import { formatDate } from '@/utils/formatDateTime';
 import { apiClient } from '@/lib/apiClient';
+import { useDeleteColumnCard } from '@/querys/Dashboard/coulmnCardQuery';
 
 interface ColumnDetailModalProps {
   isOpen: boolean;
@@ -28,7 +29,6 @@ interface ColumnDetailModalProps {
   cardData: CardType;
   defaultImage: boolean;
   columnTitle: string;
-  getCards: (id?: number) => void;
   onFetchNextComments?: () => Promise<void>;
   hasNextPage?: boolean;
   isLoadingComments?: boolean;
@@ -41,7 +41,6 @@ const ColumnDetailModal = ({
   cardData,
   defaultImage = false,
   columnTitle,
-  getCards,
   onFetchNextComments,
   hasNextPage = false,
   // isLoadingComments = false,
@@ -52,6 +51,11 @@ const ColumnDetailModal = ({
   const [comments, setComments] = useState<CommentsType[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { isOpen: isToDoUpdateModalOpen, open, close } = useModal();
+
+  const { deleteCardMutation } = useDeleteColumnCard({
+    cardId: cardData.id,
+    columnId: cardData.columnId,
+  });
 
   const tags = separateTagColor(cardData.tags);
 
@@ -107,8 +111,7 @@ const ColumnDetailModal = ({
 
   const handleCardDelete = async () => {
     try {
-      await apiClient.delete(`${EXTERNAL_API.CARDS.ROOT}/${cardData.id}`);
-      getCards();
+      await deleteCardMutation();
     } catch (err) {
       console.error(err);
     }
@@ -243,7 +246,6 @@ const ColumnDetailModal = ({
         onClose={close}
         columnId={cardData.columnId}
         card={cardData}
-        getCards={getCards}
       />
       <Modal isOpen={isOpen} onClose={onClose} padding="32/24" borderRadius="8" ref={modalRef}>
         <div className="flex w-full flex-col gap-2 md:gap-6">

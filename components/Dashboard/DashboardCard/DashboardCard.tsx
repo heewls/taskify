@@ -25,10 +25,9 @@ export interface CardType {
 export interface CardProps {
   card: CardType;
   columnTitle: string;
-  getCards: (id?: number) => void;
 }
 
-export default function Card({ card, columnTitle, getCards }: CardProps) {
+export default function Card({ card, columnTitle }: CardProps) {
   const { imageUrl, title, tags, dueDate, assignee } = card;
   const { isOpen, open, close } = useModal();
   const tag = separateTagColor(tags);
@@ -43,7 +42,6 @@ export default function Card({ card, columnTitle, getCards }: CardProps) {
         onClose={close}
         cardData={card}
         columnTitle={columnTitle}
-        getCards={getCards}
       />
       <div
         className="border-gray300 flex w-full cursor-pointer items-center justify-center rounded-md border border-solid bg-white p-3 sm:p-3 md:p-4 md:px-5 md:py-[18px]"

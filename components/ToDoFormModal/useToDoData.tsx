@@ -3,10 +3,9 @@ import { DropdownItem } from '../common/Dropdown/types';
 import { postDashboardCardImage } from './action';
 import checkAllFormComplete from '@/utils/checkAllFormComplete';
 import formatDateTime, { parseDateTime } from '@/utils/formatDateTime';
-import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
-import EXTERNAL_API from '@/constants/api/external';
 import { CardType } from '../Dashboard/DashboardCard/DashboardCard';
-import { apiClient } from '@/lib/apiClient';
+import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
+import { useManageColumnCards } from '@/querys/Dashboard/coulmnCardQuery';
 
 interface ToDoData {
   title: string;
@@ -26,7 +25,6 @@ export default function useToDoData(
   columnId: number,
   dashboardId: number,
   onClose: () => void,
-  getCards: (id?: number) => void,
   card?: CardType
 ) {
   const [toDoData, setToDoData] = useState<ToDoData>(INITIAL_TO_DO_VALUE);
@@ -58,8 +56,8 @@ export default function useToDoData(
     description: toDoData.description,
     dueDate: formatDateTime(toDoData.dueDate),
     dashboardId,
-    assigneeUserId: assigneeUser.id,
-    columnId: card ? columnName.id : columnId,
+    assigneeUserId: Number(assigneeUser.id),
+    columnId: card ? Number(columnName.id) : columnId,
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -102,29 +100,23 @@ export default function useToDoData(
 
   const isFormComplete = checkAllFormComplete(data) && tags.length !== 0;
 
+  const payload = {
+    ...data,
+    tags,
+    imageUrl: toDoData.imageUrl ?? DEFAULT_CARD_IMAGE,
+  };
+
+  const onSuccess = () => {
+    setToDoData(INITIAL_TO_DO_VALUE);
+    setTags([]);
+    onClose();
+  };
+  const { manageCardMutation } = useManageColumnCards({ payload, card, onSuccess });
+
   const handleToDoSubmit = async () => {
     if (!isFormComplete) return;
 
-    try {
-      const url: string = card
-        ? `${EXTERNAL_API.CARDS.ROOT}/${card.id}`
-        : `${EXTERNAL_API.CARDS.ROOT}`;
-      const method = card ? apiClient.put<{ columnId: number }> : apiClient.post;
-
-      await method(url, {
-        ...data,
-        tags,
-        imageUrl: toDoData.imageUrl ?? DEFAULT_CARD_IMAGE,
-      });
-
-      setToDoData(INITIAL_TO_DO_VALUE);
-      setTags([]);
-
-      onClose();
-      getCards();
-    } catch (err) {
-      console.error(err);
-    }
+    manageCardMutation();
   };
 
   return {

@@ -8,7 +8,7 @@ interface CardsPromise {
   totalCount: number;
 }
 
-export default async function getDashboardCard(id: number) {
+export default async function getColumnCards(id: number) {
   const response = await apiServer.get<CardsPromise>(`/cards?columnId=${id}`);
   return response.data;
 }
