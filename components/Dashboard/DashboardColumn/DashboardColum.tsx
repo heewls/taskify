@@ -22,38 +22,6 @@ export default function DashboardColumn({ columnId, columnTitle }: ColumnType) {
   const { data } = useGetCoulmnCards(columnId);
   const queryClient = useQueryClient();
 
-  // const getCards = useCallback(
-  //   async (id?: number) => {
-  //     try {
-  //       const data = await getDashboardCard(id ?? columnId);
-  //       const dbOrder = await cardOrdersTable.get(id ?? columnId);
-
-  //       setCards(() => {
-  //         const orderedCards = dbOrder
-  //           ? (dbOrder.order
-  //               .map((id: number) => data.cards.find((card) => card.id === id))
-  //               .filter(Boolean) as CardType[])
-  //           : [];
-
-  //         const missingCards = data.cards.filter(
-  //           (card) => !orderedCards.some((c) => c.id === card.id)
-  //         );
-
-  //         return [...missingCards, ...orderedCards];
-  //       });
-
-  //       setTotalCounts(data.totalCount);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   },
-  //   [columnId]
-  // );
-
-  // useEffect(() => {
-  //   getCards();
-  // }, [getCards]);
-
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id || !data) return;

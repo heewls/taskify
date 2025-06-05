@@ -106,17 +106,18 @@ export default function useToDoData(
     imageUrl: toDoData.imageUrl ?? DEFAULT_CARD_IMAGE,
   };
 
-  const onSuccess = () => {
-    setToDoData(INITIAL_TO_DO_VALUE);
-    setTags([]);
-    onClose();
-  };
-  const { manageCardMutation } = useManageColumnCards({ payload, card, onSuccess });
+  const { manageCardMutation } = useManageColumnCards({ payload, card });
 
-  const handleToDoSubmit = async () => {
+  const handleToDoSubmit = () => {
     if (!isFormComplete) return;
 
-    manageCardMutation();
+    manageCardMutation()
+      .then(() => {
+        setToDoData(INITIAL_TO_DO_VALUE);
+        setTags([]);
+        onClose();
+      })
+      .catch((err) => console.error(err));
   };
 
   return {

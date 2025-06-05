@@ -19,17 +19,17 @@ export function useGetCoulmnCards(columnId: number) {
   return useQuery({
     queryKey: ['column-cards', columnId],
     queryFn: () => getDndCards(columnId),
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 }
 
 export function useManageColumnCards({
   payload,
   card,
-  onSuccess,
 }: {
   payload: ResponseType;
   card?: CardType;
-  onSuccess: () => void;
 }) {
   const queryClient = useQueryClient();
 
@@ -44,7 +44,6 @@ export function useManageColumnCards({
       queryClient.invalidateQueries({
         queryKey: ['column-cards', payload.columnId],
       });
-      onSuccess();
     },
   });
 

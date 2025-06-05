@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Modal from '@/components/common/Modal';
 import CloseIcon from '@/assets/icons/CloseIcon';
 import Image from 'next/image';
@@ -9,7 +9,6 @@ import Textarea from '@/components/common/Textarea';
 import Button from '@/components/common/Button';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { useBlockScroll } from '@/hooks/useBlockScroll';
-import { CommentPromise, CommentsType } from './types';
 import { MenuDropdown } from '@/components/common/Dropdown';
 import { CardType } from '@/components/Dashboard/DashboardCard/DashboardCard';
 import UserBadge from '@/components/UserBadge/UserBadge';
@@ -17,11 +16,10 @@ import ColumnName from '@/components/ColumnName/ColumnName';
 import { separateTagColor } from '@/utils/separateTagColor';
 import { useModal } from '@/hooks/useModal';
 import ToDoFormModal from '@/components/ToDoFormModal/ToDoFormModal';
-import EXTERNAL_API from '@/constants/api/external';
 import Comment from '@/components/Comment/Comment';
 import { formatDate } from '@/utils/formatDateTime';
-import { apiClient } from '@/lib/apiClient';
 import { useDeleteColumnCard } from '@/querys/Dashboard/coulmnCardQuery';
+import { useGetComments, useCreateComment } from '@/querys/Dashboard/commentQuery';
 
 interface ColumnDetailModalProps {
   isOpen: boolean;
@@ -48,9 +46,17 @@ const ColumnDetailModal = ({
 }: ColumnDetailModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [commentText, setCommentText] = useState('');
-  const [comments, setComments] = useState<CommentsType[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { isOpen: isToDoUpdateModalOpen, open, close } = useModal();
+
+  const { data } = useGetComments(cardData.id);
+
+  const { createCommentMutation } = useCreateComment({
+    content: commentText,
+    columnId: cardData.columnId,
+    cardId: cardData.id,
+    dashboardId: cardData.dashboardId,
+  });
 
   const { deleteCardMutation } = useDeleteColumnCard({
     cardId: cardData.id,
@@ -70,37 +76,12 @@ const ColumnDetailModal = ({
     threshold,
   });
 
-  const getComments = useCallback(async () => {
-    try {
-      const response = await apiClient.get<CommentPromise>(
-        `${EXTERNAL_API.COMMENTS.ROOT}?cardId=${cardData.id}`
-      );
-      setComments(response.data.comments);
-    } catch (error) {
-      console.error('댓글을 불러오는 데 실패했습니다:', error);
-    }
-  }, [cardData.id]);
-
-  useEffect(() => {
-    getComments();
-  }, [getComments]);
-
-  const onCommentSubmit = async () => {
-    await apiClient.post(`${EXTERNAL_API.COMMENTS.ROOT}`, {
-      content: commentText,
-      columnId: cardData.columnId,
-      cardId: cardData.id,
-      dashboardId: cardData.dashboardId,
-    });
-  };
-
   const handleCommentSubmit = async () => {
     if (!commentText.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
     try {
-      await onCommentSubmit();
-      getComments();
+      await createCommentMutation();
       setCommentText('');
     } catch (error) {
       console.error('Failed to submit comment:', error);
@@ -217,8 +198,8 @@ const ColumnDetailModal = ({
 
   const renderComments = () => (
     <>
-      {comments?.map((comment) => (
-        <Comment key={comment.id} comment={comment} getComments={getComments} />
+      {data?.comments?.map((comment) => (
+        <Comment key={comment.id} comment={comment} cardId={cardData.id} />
       ))}
       {/* {renderCommentsPagination()} */}
     </>
