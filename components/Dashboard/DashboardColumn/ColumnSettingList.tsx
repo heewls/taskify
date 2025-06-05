@@ -7,7 +7,7 @@ import { DropdownItem } from '@/components/common/Dropdown/types';
 import DeleteColumnModal from '@/components/DeleteColumnModal/DeleteColumnModal';
 import { useModal } from '@/hooks/useModal';
 import { useRef, useState } from 'react';
-import { ColumnType } from '../type';
+import { Column } from '../type';
 import { useClickOutside } from '@/hooks/useClickOutside';
 
 const COLUMN_DROPDOWN_LIST = [
@@ -15,7 +15,7 @@ const COLUMN_DROPDOWN_LIST = [
   { id: 'delete', value: '삭제하기' },
 ];
 
-export default function ColumnSettingList({ columnId, columnTitle }: ColumnType) {
+export default function ColumnSettingList({ columnId, columnTitle }: Column) {
   const [modalId, setModalId] = useState('');
   const [openColumnId, setOpenColumnId] = useState<number | null>(null);
   const { isOpen, open, close } = useModal();

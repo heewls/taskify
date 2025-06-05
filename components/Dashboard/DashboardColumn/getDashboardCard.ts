@@ -1,5 +1,5 @@
 import getColumnCards from '../DashboardCard/action';
-import { CardType } from '../DashboardCard/DashboardCard';
+import { Card } from '../type';
 import { cardOrdersTable } from './db';
 
 export const getDndCards = async (columnId: number) => {
@@ -11,7 +11,7 @@ export const getDndCards = async (columnId: number) => {
   const orderedCards = dbOrder
     ? (dbOrder.order
         .map((id: number) => cards.find((card) => card.id === id))
-        .filter(Boolean) as CardType[])
+        .filter(Boolean) as Card[])
     : [];
 
   const missingCards = data.cards.filter((card) => !orderedCards.some((c) => c.id === card.id));

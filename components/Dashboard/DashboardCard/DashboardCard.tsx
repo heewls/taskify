@@ -9,25 +9,9 @@ import { formatDate } from '@/utils/formatDateTime';
 import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
 import { useModal } from '@/hooks/useModal';
 import ColumnDetailModal from '@/components/compound/modal/ColumnDetailModal';
+import { CardProps } from '../type';
 
-export interface CardType {
-  id: number;
-  imageUrl: string;
-  title: string;
-  description: string;
-  tags: string[];
-  dueDate: string;
-  assignee: { profileImageUrl: string | null; id?: number; nickname?: string };
-  columnId: number;
-  dashboardId: number;
-}
-
-export interface CardProps {
-  card: CardType;
-  columnTitle: string;
-}
-
-export default function Card({ card, columnTitle }: CardProps) {
+export default function DashboardCard({ card, columnTitle }: CardProps) {
   const { imageUrl, title, tags, dueDate, assignee } = card;
   const { isOpen, open, close } = useModal();
   const tag = separateTagColor(tags);

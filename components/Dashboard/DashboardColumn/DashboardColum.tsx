@@ -2,7 +2,7 @@
 
 import AddCardBtn from './AddCardBtn';
 import ColumnSettingList from './ColumnSettingList';
-import { ColumnType } from '../type';
+import { Column } from '../type';
 import {
   DndContext,
   DragEndEvent,
@@ -18,7 +18,7 @@ import { cardOrdersTable } from './db';
 import { useGetCoulmnCards } from '@/querys/Dashboard/coulmnCardQuery';
 import { useQueryClient } from '@tanstack/react-query';
 
-export default function DashboardColumn({ columnId, columnTitle }: ColumnType) {
+export default function DashboardColumn({ columnId, columnTitle }: Column) {
   const { data } = useGetCoulmnCards(columnId);
   const queryClient = useQueryClient();
 

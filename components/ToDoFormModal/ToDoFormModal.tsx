@@ -16,12 +16,12 @@ import useDashboardParamsId from '../Dashboard/useDashboardParamsId';
 import Pencil from '@/public/icons/pencil.svg';
 import { ModalProps } from '@/types/modalProps';
 import getDashboardColumn, { ColumnsType } from '../Dashboard/DashboardColumn/action';
-import { CardType } from '../Dashboard/DashboardCard/DashboardCard';
 import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
+import { Card } from '../Dashboard/type';
 
 interface ToDoFormProps extends ModalProps {
   columnId: number;
-  card?: CardType;
+  card?: Card;
 }
 
 const INITIAL_MEMBER_VALUE = {

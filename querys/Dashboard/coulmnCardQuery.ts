@@ -2,18 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/apiClient';
 import EXTERNAL_API from '@/constants/api/external';
 import { getDndCards } from '@/components/Dashboard/DashboardColumn/getDashboardCard';
-import { CardType } from '@/components/Dashboard/DashboardCard/DashboardCard';
-
-interface ResponseType {
-  title: string;
-  description: string;
-  dashboardId: number;
-  dueDate: string;
-  imageUrl: string;
-  assigneeUserId: number;
-  columnId: number;
-  tags: string[];
-}
+import { Card, CardPayload } from '@/components/Dashboard/type';
 
 export function useGetCoulmnCards(columnId: number) {
   return useQuery({
@@ -24,13 +13,7 @@ export function useGetCoulmnCards(columnId: number) {
   });
 }
 
-export function useManageColumnCards({
-  payload,
-  card,
-}: {
-  payload: ResponseType;
-  card?: CardType;
-}) {
+export function useManageColumnCards({ payload, card }: { payload: CardPayload; card?: Card }) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({

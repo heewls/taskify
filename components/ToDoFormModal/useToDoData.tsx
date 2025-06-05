@@ -3,9 +3,9 @@ import { DropdownItem } from '../common/Dropdown/types';
 import { postDashboardCardImage } from './action';
 import checkAllFormComplete from '@/utils/checkAllFormComplete';
 import formatDateTime, { parseDateTime } from '@/utils/formatDateTime';
-import { CardType } from '../Dashboard/DashboardCard/DashboardCard';
 import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
 import { useManageColumnCards } from '@/querys/Dashboard/coulmnCardQuery';
+import { Card } from '../Dashboard/type';
 
 interface ToDoData {
   title: string;
@@ -25,7 +25,7 @@ export default function useToDoData(
   columnId: number,
   dashboardId: number,
   onClose: () => void,
-  card?: CardType
+  card?: Card
 ) {
   const [toDoData, setToDoData] = useState<ToDoData>(INITIAL_TO_DO_VALUE);
   const [assigneeUser, setAssigneeUser] = useState<DropdownItem>({

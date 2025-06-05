@@ -10,7 +10,6 @@ import Button from '@/components/common/Button';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { useBlockScroll } from '@/hooks/useBlockScroll';
 import { MenuDropdown } from '@/components/common/Dropdown';
-import { CardType } from '@/components/Dashboard/DashboardCard/DashboardCard';
 import UserBadge from '@/components/UserBadge/UserBadge';
 import ColumnName from '@/components/ColumnName/ColumnName';
 import { separateTagColor } from '@/utils/separateTagColor';
@@ -20,11 +19,12 @@ import Comment from '@/components/Comment/Comment';
 import { formatDate } from '@/utils/formatDateTime';
 import { useDeleteColumnCard } from '@/querys/Dashboard/coulmnCardQuery';
 import { useGetComments, useCreateComment } from '@/querys/Dashboard/commentQuery';
+import { Card } from '@/components/Dashboard/type';
 
 interface ColumnDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  cardData: CardType;
+  cardData: Card;
   defaultImage: boolean;
   columnTitle: string;
   onFetchNextComments?: () => Promise<void>;
