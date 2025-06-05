@@ -4,7 +4,7 @@ import { postDashboardCardImage } from './action';
 import checkAllFormComplete from '@/utils/checkAllFormComplete';
 import formatDateTime, { parseDateTime } from '@/utils/formatDateTime';
 import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
-import { useManageColumnCards } from '@/querys/Dashboard/coulmnCardQuery';
+import { useManageColumnCards } from '@/querys/dashboard/coulmnCardQuery';
 import { Card } from '../Dashboard/type';
 
 interface ToDoData {

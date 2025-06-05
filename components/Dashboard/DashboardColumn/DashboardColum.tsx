@@ -15,7 +15,7 @@ import {
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import SortableCard from '../DashboardCard/SortableCard';
 import { cardOrdersTable } from './db';
-import { useGetCoulmnCards } from '@/querys/Dashboard/coulmnCardQuery';
+import { useGetCoulmnCards } from '@/querys/dashboard/coulmnCardQuery';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function DashboardColumn({ columnId, columnTitle }: Column) {
