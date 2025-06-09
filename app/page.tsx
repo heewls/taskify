@@ -53,7 +53,7 @@ const SETTING_BOARD = [
 
 export default function Home() {
   return (
-    <>
+    <div>
       <GuestHeader />
       <div className="flex h-full w-full items-center justify-center bg-black px-4">
         <div className="flex w-full flex-col items-center justify-center gap-10">
@@ -124,6 +124,6 @@ export default function Home() {
         </div>
       </div>
       <Footer />
-    </>
+    </div>
   );
 }

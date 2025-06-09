@@ -53,7 +53,7 @@ export default function DashboardColumn({ columnId, columnTitle }: Column) {
   return (
     <div className="border-gray200 w-full shrink-0 overflow-y-scroll border-b border-solid px-5 pb-4.5 lg:h-full lg:w-[354px] lg:border-r lg:border-b-0">
       <div>
-        <div className="bg-gray100 sticky top-0 z-5 py-4.5">
+        <div className="bg-gray100 sticky top-0 z-1 py-4.5">
           <div className="mb-1.5 flex items-center justify-between">
             <div className="flex items-center justify-center gap-2">
               <div className="bg-violet h-2 w-2 rounded-full" />
