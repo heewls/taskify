@@ -1,21 +1,16 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
 import { SearchableDropdown, SelectionDropdown } from '../common/Dropdown';
 import Modal from '../common/Modal';
 import FormField from '../compound/form/FormField';
 import UploadImage from '../compound/upload/UploadImage';
-import ColumnName from '../ColumnName/ColumnName';
 import TagInput from './TagInput';
 import useToDoData from './useToDoData';
 import { DropdownItem } from '../common/Dropdown/types';
-import UserBadge from '../UserBadge/UserBadge';
-import { getMembers, Member } from './action';
 import DueDate from './DueDate';
 import useDashboardParamsId from '../Dashboard/useDashboardParamsId';
 import Pencil from '@/public/icons/pencil.svg';
 import { ModalProps } from '@/types/modalProps';
-import getDashboardColumn, { ColumnsType } from '../Dashboard/DashboardColumn/action';
 import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
 import { Card } from '../Dashboard/type';
 
@@ -24,82 +19,28 @@ interface ToDoFormProps extends ModalProps {
   card?: Card;
 }
 
-const INITIAL_MEMBER_VALUE = {
-  id: 0,
-  nickname: '',
-  profileImageUrl: '',
-  userId: 0,
-};
-
 export default function ToDoFormModal({ isOpen, onClose, columnId, card }: ToDoFormProps) {
-  const [dashboardMembers, setDashboardMembers] = useState<Member[]>([INITIAL_MEMBER_VALUE]);
-  const [columnsName, setColumnsName] = useState<ColumnsType[]>([{ id: 0, title: '' }]);
-
   const { dashboardId } = useDashboardParamsId();
 
   const {
     toDoData,
+    memberList,
+    columnList,
+    memberSelectedItem,
+    columnSelectedItem,
     dueDate,
     image,
     isFormComplete,
     handleFormChange,
     handleAssigneeUserChange,
     handleColumnChange,
-    handleDueDateChange,
     handleImageChange,
+    handleDueDateChange,
     handleTagsChange,
     handleToDoSubmit,
   } = useToDoData(columnId, dashboardId, onClose, card);
 
   const createOrUpdate = card?.id ? '수정' : '생성';
-
-  useEffect(() => {
-    if (!dashboardId) return;
-
-    const getDatas = async () => {
-      try {
-        const [columns, membersData] = await Promise.all([
-          getDashboardColumn(dashboardId),
-          getMembers(dashboardId),
-        ]);
-
-        if (columns) setColumnsName(columns);
-        if (membersData) setDashboardMembers(membersData.members);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    getDatas();
-  }, [dashboardId]);
-
-  const memberList = useMemo(() => {
-    return dashboardMembers.map((member) => ({
-      value: member.nickname,
-      id: member.userId,
-      renderItem: () => (
-        <UserBadge
-          size={26}
-          profile={member.profileImageUrl}
-          userName={member.nickname}
-          gap={6}
-          fontSize="R14"
-        />
-      ),
-    }));
-  }, [dashboardMembers]);
-
-  const memberSelectedItem = memberList.find((member) => member.id === card?.assignee?.id);
-
-  const columnList = useMemo(() => {
-    return columnsName.map((column) => ({
-      value: column.title,
-      id: column.id,
-      renderItem: () => <ColumnName columnName={column.title} />,
-    }));
-  }, [columnsName]);
-
-  const columnSelectedItem = columnList.find((column) => column.id === columnId);
 
   return (
     <Modal

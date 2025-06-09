@@ -4,7 +4,7 @@ import { ModalProps } from '@/types/modalProps';
 import Modal from '../common/Modal';
 import FormField from '../compound/form/FormField';
 import useDashboardParamsId from '../Dashboard/useDashboardParamsId';
-import getDashboardColumn, { ColumnsType } from '../Dashboard/DashboardColumn/action';
+import getDashboardColumn, { Columns } from '../Dashboard/DashboardColumn/action';
 import { apiClient } from '@/lib/apiClient';
 
 const COLUMN_NAME_ERROR_MESSAGE = {
@@ -27,7 +27,7 @@ export default function ColumnManagementModal({
   option,
 }: ColumnManagementProps) {
   const [columnName, setColumnName] = useState(columnTitle ?? '');
-  const [dashboardColumns, setDashboardColumns] = useState<ColumnsType[]>([]);
+  const [dashboardColumns, setDashboardColumns] = useState<Columns[]>([]);
   const [columnErrorMessage, setColumnErrorMessage] = useState('');
   const { dashboardId } = useDashboardParamsId();
 

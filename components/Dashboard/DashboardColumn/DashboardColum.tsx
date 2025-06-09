@@ -1,8 +1,6 @@
 'use client';
 
-import AddCardBtn from './AddCardBtn';
-import ColumnSettingList from './ColumnSettingList';
-import { Column } from '../type';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   DndContext,
   DragEndEvent,
@@ -13,10 +11,12 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import SortableCard from '../DashboardCard/SortableCard';
 import { cardOrdersTable } from './db';
+import AddCardBtn from './AddCardBtn';
+import ColumnSettingList from './ColumnSettingList';
+import { Column } from '../type';
+import SortableCard from '../DashboardCard/SortableCard';
 import { useGetCoulmnCards } from '@/querys/dashboard/coulmnCardQuery';
-import { useQueryClient } from '@tanstack/react-query';
 
 export default function DashboardColumn({ columnId, columnTitle }: Column) {
   const { data } = useGetCoulmnCards(columnId);

@@ -2,13 +2,13 @@
 
 import { apiServer } from '@/lib/apiServer';
 
-export interface ColumnsType {
+export interface Columns {
   id: number;
   title: string;
 }
 
-interface ColumnPromise {
-  data: ColumnsType[];
+export interface ColumnPromise {
+  data: Columns[];
 }
 
 export default async function getDashboardColumn(dashboardId: number) {

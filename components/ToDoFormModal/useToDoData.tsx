@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { DropdownItem } from '../common/Dropdown/types';
-import { postDashboardCardImage } from './action';
+import { getColumns, getMembers, Member, postDashboardCardImage } from './action';
 import checkAllFormComplete from '@/utils/checkAllFormComplete';
 import formatDateTime, { parseDateTime } from '@/utils/formatDateTime';
 import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
 import { useManageColumnCards } from '@/querys/dashboard/coulmnCardQuery';
 import { Card } from '../Dashboard/type';
+import UserBadge from '../UserBadge/UserBadge';
+import ColumnName from '../ColumnName/ColumnName';
+import { Columns } from '../Dashboard/DashboardColumn/action';
 
 interface ToDoData {
   title: string;
@@ -28,6 +31,8 @@ export default function useToDoData(
   card?: Card
 ) {
   const [toDoData, setToDoData] = useState<ToDoData>(INITIAL_TO_DO_VALUE);
+  const [dashboardMembers, setDashboardMembers] = useState<Member[]>([]);
+  const [columns, setColumns] = useState<Columns[]>([{ id: 0, title: '' }]);
   const [assigneeUser, setAssigneeUser] = useState<DropdownItem>({
     id: card?.assignee?.id ?? '',
     value: '',
@@ -120,8 +125,60 @@ export default function useToDoData(
       .catch((err) => console.error(err));
   };
 
+  useEffect(() => {
+    if (!dashboardId) return;
+
+    const getDatas = async () => {
+      try {
+        const [columns, membersData] = await Promise.all([
+          getColumns(dashboardId),
+          getMembers(dashboardId),
+        ]);
+
+        if (columns) setColumns(columns);
+        if (membersData) setDashboardMembers(membersData.members);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    getDatas();
+  }, [dashboardId]);
+
+  const memberList = useMemo(() => {
+    return dashboardMembers.map((member) => ({
+      value: member.nickname,
+      id: member.userId,
+      renderItem: () => (
+        <UserBadge
+          size={26}
+          profile={member.profileImageUrl}
+          userName={member.nickname}
+          gap={6}
+          fontSize="R14"
+        />
+      ),
+    }));
+  }, [dashboardMembers]);
+
+  const memberSelectedItem = memberList.find((member) => member.id === card?.assignee?.id);
+
+  const columnList = useMemo(() => {
+    return columns.map((column) => ({
+      value: column.title,
+      id: column.id,
+      renderItem: () => <ColumnName columnName={column.title} />,
+    }));
+  }, [columns]);
+
+  const columnSelectedItem = columnList.find((column) => column.id === columnId);
+
   return {
     toDoData,
+    memberList,
+    columnList,
+    memberSelectedItem,
+    columnSelectedItem,
     dueDate: toDoData.dueDate,
     image: toDoData.imageUrl,
     isFormComplete,
