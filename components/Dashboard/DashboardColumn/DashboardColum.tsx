@@ -16,10 +16,10 @@ import AddCardBtn from './AddCardBtn';
 import ColumnSettingList from './ColumnSettingList';
 import { Column } from '../type';
 import SortableCard from '../DashboardCard/SortableCard';
-import { useGetCoulmnCards } from '@/querys/dashboard/coulmnCardQuery';
+import { useGetColumnCards } from '@/querys/dashboard/columnCardQuery';
 
 export default function DashboardColumn({ columnId, columnTitle }: Column) {
-  const { data } = useGetCoulmnCards(columnId);
+  const { data } = useGetColumnCards(columnId);
   const queryClient = useQueryClient();
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -51,22 +51,24 @@ export default function DashboardColumn({ columnId, columnTitle }: Column) {
   );
 
   return (
-    <div className="border-gray200 w-full shrink-0 overflow-y-scroll border-b border-solid px-5 py-[18px] lg:h-full lg:w-[354px] lg:border-r lg:border-b-0">
+    <div className="border-gray200 w-full shrink-0 overflow-y-scroll border-b border-solid px-5 pb-4.5 lg:h-full lg:w-[354px] lg:border-r lg:border-b-0">
       <div>
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center justify-center gap-2">
-            <div className="bg-violet h-2 w-2 rounded-full" />
-            <h2 className="text-bold16 text-black">{columnTitle}</h2>
-            <span className="bg-gray200 text-medium12 text-gray500 ml-1 flex items-center justify-center rounded-sm px-1.5 py-[3px]">
-              {data?.totalCount ?? 0}
-            </span>
+        <div className="bg-gray100 sticky top-0 z-5 py-4.5">
+          <div className="mb-1.5 flex items-center justify-between">
+            <div className="flex items-center justify-center gap-2">
+              <div className="bg-violet h-2 w-2 rounded-full" />
+              <h2 className="text-bold16 text-black">{columnTitle}</h2>
+              <span className="bg-gray200 text-medium12 text-gray500 ml-1 flex items-center justify-center rounded-sm px-1.5 py-[3px]">
+                {data?.totalCount ?? 0}
+              </span>
+            </div>
+            <ColumnSettingList columnId={columnId} columnTitle={columnTitle} />
           </div>
-          <ColumnSettingList columnId={columnId} columnTitle={columnTitle} />
+          <AddCardBtn columnId={columnId} />
         </div>
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
           <SortableContext items={data?.cards ?? []} strategy={verticalListSortingStrategy}>
             <div className="flex w-full flex-col gap-2 md:gap-4">
-              <AddCardBtn columnId={columnId} />
               {data?.cards.map((card) => (
                 <SortableCard key={card.id} card={card} columnTitle={columnTitle} />
               ))}

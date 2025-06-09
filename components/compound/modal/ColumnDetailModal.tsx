@@ -17,7 +17,7 @@ import { useModal } from '@/hooks/useModal';
 import ToDoFormModal from '@/components/ToDoFormModal/ToDoFormModal';
 import Comment from '@/components/Comment/Comment';
 import { formatDate } from '@/utils/formatDateTime';
-import { useDeleteColumnCard } from '@/querys/dashboard/coulmnCardQuery';
+import { useDeleteColumnCard } from '@/querys/dashboard/columnCardQuery';
 import { useGetComments, useCreateComment } from '@/querys/dashboard/commentQuery';
 import { Card } from '@/components/Dashboard/type';
 

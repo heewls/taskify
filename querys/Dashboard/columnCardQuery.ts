@@ -4,7 +4,7 @@ import EXTERNAL_API from '@/constants/api/external';
 import { getDndCards } from '@/components/Dashboard/DashboardColumn/getDashboardCard';
 import { Card, CardPayload } from '@/components/Dashboard/type';
 
-export function useGetCoulmnCards(columnId: number) {
+export function useGetColumnCards(columnId: number) {
   return useQuery({
     queryKey: ['column-cards', columnId],
     queryFn: () => getDndCards(columnId),

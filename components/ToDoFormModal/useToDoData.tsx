@@ -4,7 +4,7 @@ import { getColumns, getMembers, Member, postDashboardCardImage } from './action
 import checkAllFormComplete from '@/utils/checkAllFormComplete';
 import formatDateTime, { parseDateTime } from '@/utils/formatDateTime';
 import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
-import { useManageColumnCards } from '@/querys/dashboard/coulmnCardQuery';
+import { useManageColumnCards } from '@/querys/dashboard/columnCardQuery';
 import { Card } from '../Dashboard/type';
 import UserBadge from '../UserBadge/UserBadge';
 import ColumnName from '../ColumnName/ColumnName';
