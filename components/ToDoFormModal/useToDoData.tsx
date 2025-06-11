@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { DropdownItem } from '../common/Dropdown/types';
-import { getColumns, getMembers, Member, postDashboardCardImage } from './action';
+import { getMembers, Member, postDashboardCardImage } from './action';
 import checkAllFormComplete from '@/utils/checkAllFormComplete';
 import formatDateTime, { parseDateTime } from '@/utils/formatDateTime';
 import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
@@ -8,7 +8,7 @@ import { useManageColumnCards } from '@/querys/dashboard/columnCardQuery';
 import { Card } from '../Dashboard/type';
 import UserBadge from '../UserBadge/UserBadge';
 import ColumnName from '../ColumnName/ColumnName';
-import { Columns } from '../Dashboard/DashboardColumn/action';
+import { useDashboardColumns } from '@/store/useDashboardColumns';
 
 interface ToDoData {
   title: string;
@@ -32,7 +32,6 @@ export default function useToDoData(
 ) {
   const [toDoData, setToDoData] = useState<ToDoData>(INITIAL_TO_DO_VALUE);
   const [dashboardMembers, setDashboardMembers] = useState<Member[]>([]);
-  const [columns, setColumns] = useState<Columns[]>([{ id: 0, title: '' }]);
   const [assigneeUser, setAssigneeUser] = useState<DropdownItem>({
     id: card?.assignee?.id ?? '',
     value: '',
@@ -42,6 +41,8 @@ export default function useToDoData(
     value: '',
   });
   const [tags, setTags] = useState<string[]>(card?.tags ?? []);
+
+  const columns = useDashboardColumns((s) => s.dashboardColumns);
 
   useEffect(() => {
     if (card) {
@@ -130,12 +131,8 @@ export default function useToDoData(
 
     const getDatas = async () => {
       try {
-        const [columns, membersData] = await Promise.all([
-          getColumns(dashboardId),
-          getMembers(dashboardId),
-        ]);
+        const membersData = await getMembers(dashboardId);
 
-        if (columns) setColumns(columns);
         if (membersData) setDashboardMembers(membersData.members);
       } catch (err) {
         console.error(err);

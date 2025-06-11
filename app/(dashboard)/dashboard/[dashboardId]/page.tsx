@@ -1,5 +1,6 @@
 import AddColumnBtn from '@/components/Dashboard/AddColumnBtn';
 import DashboardColumn from '@/components/Dashboard/DashboardColumn/DashboardColum';
+import { DashboardColumnsStore } from '@/components/Dashboard/DashboardColumn/DashboardColumnsStore';
 import getDashboardColumn from '@/components/Dashboard/DashboardColumn/action';
 
 export default async function DashboardId({
@@ -21,13 +22,15 @@ export default async function DashboardId({
     );
 
   return (
-    <div className="flex h-full flex-col overflow-x-scroll pb-24 lg:flex-row lg:pb-0">
-      {columns.map((column) => (
-        <DashboardColumn key={column.id} columnTitle={column.title} columnId={column.id} />
-      ))}
-      <div className="fixed right-7 bottom-7 z-5 lg:static lg:mx-5 lg:mt-[68px]">
-        <AddColumnBtn />
+    <DashboardColumnsStore initialColumns={columns}>
+      <div className="flex h-full flex-col overflow-x-scroll pb-24 lg:flex-row lg:pb-0">
+        {columns.map((column) => (
+          <DashboardColumn key={column.id} columnTitle={column.title} columnId={column.id} />
+        ))}
+        <div className="fixed right-7 bottom-7 z-5 lg:static lg:mx-5 lg:mt-[68px]">
+          <AddColumnBtn />
+        </div>
       </div>
-    </div>
+    </DashboardColumnsStore>
   );
 }
