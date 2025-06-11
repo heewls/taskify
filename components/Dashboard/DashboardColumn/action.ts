@@ -26,7 +26,10 @@ interface MembersPromise {
 
 export default async function getDashboardColumn(dashboardId: number) {
   const response = await apiServer.get<ColumnPromise>(
-    `${EXTERNAL_API.COLUMNS.ROOT}?dashboardId=${dashboardId}`
+    `${EXTERNAL_API.COLUMNS.ROOT}?dashboardId=${dashboardId}`,
+    {
+      next: { tags: [`columns-${dashboardId}`] },
+    }
   );
   return response.data.data;
 }

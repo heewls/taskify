@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import EXTERNAL_API from '@/constants/api/external';
 import { ModalProps } from '@/types/modalProps';
 import Modal from '../common/Modal';
 import FormField from '../compound/form/FormField';
 import useDashboardParamsId from '../Dashboard/useDashboardParamsId';
-import { apiClient } from '@/lib/apiClient';
 import { useDashboardStore } from '@/store/useDashboardStore';
+import { Column } from '../Dashboard/type';
+import { createColumn, updateColumn } from './action';
 
 const COLUMN_NAME_ERROR_MESSAGE = {
   ALREADY_EXISTS: '중복된 컬럼 이름입니다',
@@ -13,9 +13,7 @@ const COLUMN_NAME_ERROR_MESSAGE = {
   EQUAL_TITLE: '기존 칼럼과 동일한 이름입니다',
 };
 
-interface ColumnManagementProps extends ModalProps {
-  columnId?: number;
-  columnTitle?: string;
+interface ColumnManagementProps extends ModalProps, Partial<Column> {
   option: 'create' | 'update';
 }
 
@@ -49,18 +47,13 @@ export default function ColumnManagementModal({
 
     try {
       if (updateOption) {
-        await apiClient.put(`${EXTERNAL_API.COLUMNS.ROOT}/${columnId}`, {
-          title: columnName,
-        });
+        if (!columnId) return;
+        await updateColumn({ columnId, columnName, dashboardId });
       } else {
-        await apiClient.post(EXTERNAL_API.COLUMNS.ROOT, {
-          title: columnName,
-          dashboardId,
-        });
+        await createColumn({ dashboardId, columnName });
       }
 
       onClose();
-      window.location.reload();
     } catch (err) {
       console.error(err);
       setColumnErrorMessage('다시 시도해 주세요');

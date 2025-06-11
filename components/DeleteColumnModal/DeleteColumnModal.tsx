@@ -1,16 +1,17 @@
 import { ModalProps } from '@/types/modalProps';
-import EXTERNAL_API from '@/constants/api/external';
 import Modal from '../common/Modal';
-import { apiClient } from '@/lib/apiClient';
+import useDashboardParamsId from '../Dashboard/useDashboardParamsId';
+import { deleteColumn } from './action';
 
 interface DeleteColumnProps extends ModalProps {
   columnId: number;
 }
 
 export default function DeleteColumnModal({ isOpen, onClose, columnId }: DeleteColumnProps) {
-  const handelColumnDelete = async () => {
-    await apiClient.delete(`${EXTERNAL_API.COLUMNS.ROOT}/${columnId}`).then(() => onClose());
-    window.location.reload();
+  const { dashboardId } = useDashboardParamsId();
+
+  const handelColumnDelete = () => {
+    deleteColumn({ columnId, dashboardId }).then(() => onClose());
   };
 
   return (
