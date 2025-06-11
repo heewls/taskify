@@ -5,7 +5,7 @@ import Modal from '../common/Modal';
 import FormField from '../compound/form/FormField';
 import useDashboardParamsId from '../Dashboard/useDashboardParamsId';
 import { apiClient } from '@/lib/apiClient';
-import { useDashboardColumns } from '@/store/useDashboardColumns';
+import { useDashboardStore } from '@/store/useDashboardStore';
 
 const COLUMN_NAME_ERROR_MESSAGE = {
   ALREADY_EXISTS: '중복된 컬럼 이름입니다',
@@ -29,7 +29,7 @@ export default function ColumnManagementModal({
   const [columnName, setColumnName] = useState(columnTitle ?? '');
   const [columnErrorMessage, setColumnErrorMessage] = useState('');
   const { dashboardId } = useDashboardParamsId();
-  const columns = useDashboardColumns((s) => s.dashboardColumns);
+  const columns = useDashboardStore((s) => s.dashboardColumns);
 
   const hasColumnName = columnName.trim();
   const isCheckedSameColumnName = columns.some((column) => column.title === columnName);

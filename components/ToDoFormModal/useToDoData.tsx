@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { DropdownItem } from '../common/Dropdown/types';
-import { getMembers, Member, postDashboardCardImage } from './action';
+import { postDashboardCardImage } from './action';
 import checkAllFormComplete from '@/utils/checkAllFormComplete';
 import formatDateTime, { parseDateTime } from '@/utils/formatDateTime';
 import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
@@ -8,7 +8,7 @@ import { useManageColumnCards } from '@/querys/dashboard/columnCardQuery';
 import { Card } from '../Dashboard/type';
 import UserBadge from '../UserBadge/UserBadge';
 import ColumnName from '../ColumnName/ColumnName';
-import { useDashboardColumns } from '@/store/useDashboardColumns';
+import { useDashboardStore } from '@/store/useDashboardStore';
 
 interface ToDoData {
   title: string;
@@ -31,7 +31,6 @@ export default function useToDoData(
   card?: Card
 ) {
   const [toDoData, setToDoData] = useState<ToDoData>(INITIAL_TO_DO_VALUE);
-  const [dashboardMembers, setDashboardMembers] = useState<Member[]>([]);
   const [assigneeUser, setAssigneeUser] = useState<DropdownItem>({
     id: card?.assignee?.id ?? '',
     value: '',
@@ -42,7 +41,8 @@ export default function useToDoData(
   });
   const [tags, setTags] = useState<string[]>(card?.tags ?? []);
 
-  const columns = useDashboardColumns((s) => s.dashboardColumns);
+  const columns = useDashboardStore((s) => s.dashboardColumns);
+  const members = useDashboardStore((s) => s.members);
 
   useEffect(() => {
     if (card) {
@@ -126,47 +126,27 @@ export default function useToDoData(
       .catch((err) => console.error(err));
   };
 
-  useEffect(() => {
-    if (!dashboardId) return;
-
-    const getDatas = async () => {
-      try {
-        const membersData = await getMembers(dashboardId);
-
-        if (membersData) setDashboardMembers(membersData.members);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    getDatas();
-  }, [dashboardId]);
-
-  const memberList = useMemo(() => {
-    return dashboardMembers.map((member) => ({
-      value: member.nickname,
-      id: member.userId,
-      renderItem: () => (
-        <UserBadge
-          size={26}
-          profile={member.profileImageUrl}
-          userName={member.nickname}
-          gap={6}
-          fontSize="R14"
-        />
-      ),
-    }));
-  }, [dashboardMembers]);
+  const memberList = members.map((member) => ({
+    value: member.nickname,
+    id: member.userId,
+    renderItem: () => (
+      <UserBadge
+        size={26}
+        profile={member.profileImageUrl}
+        userName={member.nickname}
+        gap={6}
+        fontSize="R14"
+      />
+    ),
+  }));
 
   const memberSelectedItem = memberList.find((member) => member.id === card?.assignee?.id);
 
-  const columnList = useMemo(() => {
-    return columns.map((column) => ({
-      value: column.title,
-      id: column.id,
-      renderItem: () => <ColumnName columnName={column.title} />,
-    }));
-  }, [columns]);
+  const columnList = columns.map((column) => ({
+    value: column.title,
+    id: column.id,
+    renderItem: () => <ColumnName columnName={column.title} />,
+  }));
 
   const columnSelectedItem = columnList.find((column) => column.id === columnId);
 

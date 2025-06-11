@@ -1,16 +1,17 @@
 import AddColumnBtn from '@/components/Dashboard/AddColumnBtn';
 import DashboardColumn from '@/components/Dashboard/DashboardColumn/DashboardColum';
-import { DashboardColumnsStore } from '@/components/Dashboard/DashboardColumn/DashboardColumnsStore';
-import getDashboardColumn from '@/components/Dashboard/DashboardColumn/action';
+import { DashboardStore } from '@/components/Dashboard/DashboardColumn/DashboardStore';
+import getDashboardColumn, { getMembers } from '@/components/Dashboard/DashboardColumn/action';
 
 export default async function DashboardId({
   params,
 }: {
   params: Promise<{ dashboardId: string }>;
 }) {
-  const dashboardId = (await params).dashboardId;
+  const { dashboardId } = await params;
 
   const columns = await getDashboardColumn(Number(dashboardId));
+  const { members } = await getMembers(Number(dashboardId));
 
   if (!columns || columns.length === 0)
     return (
@@ -22,7 +23,7 @@ export default async function DashboardId({
     );
 
   return (
-    <DashboardColumnsStore initialColumns={columns}>
+    <DashboardStore members={members} initialColumns={columns}>
       <div className="flex h-full flex-col overflow-x-scroll pb-24 lg:flex-row lg:pb-0">
         {columns.map((column) => (
           <DashboardColumn key={column.id} columnTitle={column.title} columnId={column.id} />
@@ -31,6 +32,6 @@ export default async function DashboardId({
           <AddColumnBtn />
         </div>
       </div>
-    </DashboardColumnsStore>
+    </DashboardStore>
   );
 }
