@@ -1,9 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   DndContext,
   DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
   closestCenter,
   MouseSensor,
   TouchSensor,
@@ -14,16 +17,23 @@ import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-ki
 import { cardOrdersTable } from './db';
 import AddCardBtn from './AddCardBtn';
 import ColumnSettingList from './ColumnSettingList';
-import { Column } from '../type';
+import { Card, Column } from '../type';
 import SortableCard from '../DashboardCard/SortableCard';
 import { useGetColumnCards } from '@/querys/dashboard/columnCardQuery';
 
 export default function DashboardColumn({ columnId, columnTitle }: Column) {
+  const [activeId, setActiveId] = useState<string | null>(null);
   const { data } = useGetColumnCards(columnId);
   const queryClient = useQueryClient();
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragStart = (e: DragStartEvent) => {
+    setActiveId(e.active.id as string);
+  };
+
+  const handleDragEnd = async (e: DragEndEvent) => {
+    const { active, over } = e;
+    setActiveId(null);
+
     if (!over || active.id === over.id || !data) return;
 
     const oldIndex = data.cards.findIndex((card) => card.id === active.id);
@@ -31,9 +41,16 @@ export default function DashboardColumn({ columnId, columnTitle }: Column) {
     if (oldIndex === -1 || newIndex === -1) return;
 
     const newCardsOrder = arrayMove(data.cards, oldIndex, newIndex);
-    await cardOrdersTable.put({ columnId, order: newCardsOrder.map((c) => c.id) });
 
-    queryClient.invalidateQueries({ queryKey: ['dashboard-cards', columnId] });
+    queryClient.setQueryData(['column-cards', columnId], (prev: Card) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        cards: newCardsOrder,
+      };
+    });
+
+    await cardOrdersTable.put({ columnId, order: newCardsOrder.map((c) => c.id) });
   };
 
   const sensors = useSensors(
@@ -49,6 +66,8 @@ export default function DashboardColumn({ columnId, columnTitle }: Column) {
       },
     })
   );
+
+  const activeCard = data?.cards.find((card) => card.id.toString() === activeId) ?? null;
 
   return (
     <div className="border-gray200 w-full shrink-0 overflow-y-scroll border-b border-solid px-5 pb-4.5 lg:h-full lg:w-[354px] lg:border-r lg:border-b-0">
@@ -66,7 +85,12 @@ export default function DashboardColumn({ columnId, columnTitle }: Column) {
           </div>
           <AddCardBtn columnId={columnId} />
         </div>
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+          onDragStart={handleDragStart}
+          sensors={sensors}
+        >
           <SortableContext items={data?.cards ?? []} strategy={verticalListSortingStrategy}>
             <div className="flex w-full flex-col gap-2 md:gap-4">
               {data?.cards.map((card) => (
@@ -74,6 +98,10 @@ export default function DashboardColumn({ columnId, columnTitle }: Column) {
               ))}
             </div>
           </SortableContext>
+
+          <DragOverlay>
+            {activeCard ? <SortableCard card={activeCard} columnTitle={columnTitle} /> : null}
+          </DragOverlay>
         </DndContext>
       </div>
     </div>

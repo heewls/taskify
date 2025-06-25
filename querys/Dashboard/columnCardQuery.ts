@@ -1,15 +1,14 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/apiClient';
 import EXTERNAL_API from '@/constants/api/external';
-import { getDndCards } from '@/components/Dashboard/DashboardColumn/getDashboardCard';
+import { getDndCards } from '@/components/Dashboard/DashboardColumn/getDndCards';
 import { Card, CardPayload } from '@/components/Dashboard/type';
 
 export function useGetColumnCards(columnId: number) {
   return useQuery({
     queryKey: ['column-cards', columnId],
     queryFn: () => getDndCards(columnId),
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    placeholderData: keepPreviousData,
   });
 }
 
