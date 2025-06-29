@@ -7,7 +7,7 @@ import UserBadge from '../UserBadge/UserBadge';
 import Textarea from '../common/Textarea';
 import Button from '../common/Button';
 import { formatISODateTime } from '@/utils/formatDateTime';
-import { useDeleteComment, useUpdateComment } from '@/querys/dashboard/commentQuery';
+import { useDeleteComment, useUpdateComment } from '@/querys/Dashboard/commentQuery';
 
 interface Comment {
   comment: CommentsType;
