@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import EXTERNAL_API from '@/constants/api/external';
+import { useState } from 'react';
 import { ModalProps } from '@/types/modalProps';
 import Modal from '../common/Modal';
 import FormField from '../compound/form/FormField';
 import useDashboardParamsId from '../Dashboard/useDashboardParamsId';
-import getDashboardColumn, { ColumnsType } from '../Dashboard/DashboardColumn/action';
-import { apiClient } from '@/lib/apiClient';
+import { useDashboardStore } from '@/store/useDashboardStore';
+import { Column } from '../Dashboard/type';
+import { createColumn, updateColumn } from './action';
 
 const COLUMN_NAME_ERROR_MESSAGE = {
   ALREADY_EXISTS: '중복된 컬럼 이름입니다',
@@ -13,9 +13,7 @@ const COLUMN_NAME_ERROR_MESSAGE = {
   EQUAL_TITLE: '기존 칼럼과 동일한 이름입니다',
 };
 
-interface ColumnManagementProps extends ModalProps {
-  columnId?: number;
-  columnTitle?: string;
+interface ColumnManagementProps extends ModalProps, Partial<Column> {
   option: 'create' | 'update';
 }
 
@@ -27,24 +25,16 @@ export default function ColumnManagementModal({
   option,
 }: ColumnManagementProps) {
   const [columnName, setColumnName] = useState(columnTitle ?? '');
-  const [dashboardColumns, setDashboardColumns] = useState<ColumnsType[]>([]);
   const [columnErrorMessage, setColumnErrorMessage] = useState('');
   const { dashboardId } = useDashboardParamsId();
+  const columns = useDashboardStore((s) => s.dashboardColumns);
 
   const hasColumnName = columnName.trim();
-  const isCheckedSameColumnName = dashboardColumns.some((column) => column.title === columnName);
-  const isMaxColumnList = dashboardColumns.length === 10;
+  const isCheckedSameColumnName = columns.some((column) => column.title === columnName);
+  const isMaxColumnList = columns.length === 10;
   const isEqualTitle = columnTitle === columnName;
   const updateOption = option === 'update';
   const createOrUpdate = updateOption ? '변경' : '생성';
-
-  useEffect(() => {
-    const getColumn = async () => {
-      const data = await getDashboardColumn(dashboardId);
-      if (data) setDashboardColumns(data);
-    };
-    getColumn();
-  }, [dashboardId]);
 
   const handleColumnSubmit = async () => {
     if (!columnName.trim()) return;
@@ -57,18 +47,13 @@ export default function ColumnManagementModal({
 
     try {
       if (updateOption) {
-        await apiClient.put(`${EXTERNAL_API.COLUMNS.ROOT}/${columnId}`, {
-          title: columnName,
-        });
+        if (!columnId) return;
+        await updateColumn({ columnId, columnName, dashboardId });
       } else {
-        await apiClient.post(EXTERNAL_API.COLUMNS.ROOT, {
-          title: columnName,
-          dashboardId,
-        });
+        await createColumn({ dashboardId, columnName });
       }
 
       onClose();
-      window.location.reload();
     } catch (err) {
       console.error(err);
       setColumnErrorMessage('다시 시도해 주세요');

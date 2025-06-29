@@ -6,13 +6,12 @@ import { CommentsType } from '../compound/modal/types';
 import UserBadge from '../UserBadge/UserBadge';
 import Textarea from '../common/Textarea';
 import Button from '../common/Button';
-import EXTERNAL_API from '@/constants/api/external';
 import { formatISODateTime } from '@/utils/formatDateTime';
-import { apiClient } from '@/lib/apiClient';
+import { useDeleteComment, useUpdateComment } from '@/querys/dashboard/commentQuery';
 
 interface Comment {
   comment: CommentsType;
-  getComments: () => void;
+  cardId: number;
 }
 
 interface UserInfo {
@@ -24,9 +23,12 @@ interface UserInfo {
   updatedAt: string;
 }
 
-export default function Comment({ comment, getComments }: Comment) {
+export default function Comment({ comment, cardId }: Comment) {
   const [isEdit, setIsEdit] = useState(false);
   const [editComment, setEditComment] = useState(comment.content);
+  const { updateCommentMutation } = useUpdateComment(cardId);
+  const { deleteCommentMutation } = useDeleteComment(cardId);
+
   const user = getItem<UserInfo>('userInfo');
   const userId = user?.id;
 
@@ -36,9 +38,8 @@ export default function Comment({ comment, getComments }: Comment) {
 
   const handleCommentUpdate = async () => {
     try {
-      await apiClient.put(`${EXTERNAL_API.COMMENTS.ROOT}/${comment.id}`, { content: editComment });
+      await updateCommentMutation({ commentId: comment.id, content: editComment });
       setIsEdit(false);
-      getComments();
     } catch (error) {
       console.error(error);
     }
@@ -46,8 +47,7 @@ export default function Comment({ comment, getComments }: Comment) {
 
   const handleCommentDelete = async () => {
     try {
-      await apiClient.delete(`${EXTERNAL_API.COMMENTS.ROOT}/${comment.id}`);
-      getComments();
+      await deleteCommentMutation(comment.id);
     } catch (error) {
       console.error(error);
     }
