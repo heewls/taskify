@@ -19,7 +19,7 @@ import AddCardBtn from './AddCardBtn';
 import ColumnSettingList from './ColumnSettingList';
 import { Card, Column } from '../type';
 import SortableCard from '../DashboardCard/SortableCard';
-import { useGetColumnCards } from '@/querys/Dashboard/columnCardQuery';
+import { useGetColumnCards } from '@/querys/dashboard/columnCardQuery';
 
 export default function DashboardColumn({ columnId, columnTitle }: Column) {
   const [activeId, setActiveId] = useState<string | null>(null);
