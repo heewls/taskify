@@ -2,9 +2,10 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import Card, { CardProps } from './DashboardCard';
+import DashboardCard from './DashboardCard';
+import { CardProps } from '../type';
 
-export default function SortableCard({ card, columnTitle, getCards }: CardProps) {
+export default function SortableCard({ card, columnTitle }: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id,
   });
@@ -20,7 +21,7 @@ export default function SortableCard({ card, columnTitle, getCards }: CardProps)
       {...attributes}
       {...listeners}
     >
-      <Card card={card} columnTitle={columnTitle} getCards={getCards} />
+      <DashboardCard card={card} columnTitle={columnTitle} />
     </div>
   );
 }

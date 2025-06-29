@@ -1,12 +1,12 @@
 'use client';
 
-import getDashboardCard from '../DashboardCard/action';
-import AddCardBtn from './AddCardBtn';
-import ColumnSettingList from './ColumnSettingList';
-import { ColumnType } from '../type';
+import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   DndContext,
   DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
   closestCenter,
   MouseSensor,
   TouchSensor,
@@ -14,58 +14,41 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useEffect, useState, useCallback } from 'react';
-import { CardType } from '../DashboardCard/DashboardCard';
-import SortableCard from '../DashboardCard/SortableCard';
 import { cardOrdersTable } from './db';
+import AddCardBtn from './AddCardBtn';
+import ColumnSettingList from './ColumnSettingList';
+import { Card, Column } from '../type';
+import SortableCard from '../DashboardCard/SortableCard';
+import { useGetColumnCards } from '@/querys/dashboard/columnCardQuery';
 
-export default function DashboardColumn({ columnId, columnTitle }: ColumnType) {
-  const [cards, setCards] = useState<CardType[]>([]);
-  const [totalCounts, setTotalCounts] = useState(0);
+export default function DashboardColumn({ columnId, columnTitle }: Column) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const { data } = useGetColumnCards(columnId);
+  const queryClient = useQueryClient();
 
-  const getCards = useCallback(
-    async (id?: number) => {
-      try {
-        const data = await getDashboardCard(id ?? columnId);
-        const dbOrder = await cardOrdersTable.get(id ?? columnId);
+  const handleDragStart = (e: DragStartEvent) => {
+    setActiveId(e.active.id as string);
+  };
 
-        setCards(() => {
-          const orderedCards = dbOrder
-            ? (dbOrder.order
-                .map((id: number) => data.cards.find((card) => card.id === id))
-                .filter(Boolean) as CardType[])
-            : [];
+  const handleDragEnd = async (e: DragEndEvent) => {
+    const { active, over } = e;
+    setActiveId(null);
 
-          const missingCards = data.cards.filter(
-            (card) => !orderedCards.some((c) => c.id === card.id)
-          );
+    if (!over || active.id === over.id || !data) return;
 
-          return [...missingCards, ...orderedCards];
-        });
+    const oldIndex = data.cards.findIndex((card) => card.id === active.id);
+    const newIndex = data.cards.findIndex((card) => card.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
 
-        setTotalCounts(data.totalCount);
-      } catch (err) {
-        console.error(err);
-      }
-    },
-    [columnId]
-  );
+    const newCardsOrder = arrayMove(data.cards, oldIndex, newIndex);
 
-  useEffect(() => {
-    getCards();
-  }, [getCards]);
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
-    const oldIndex = cards.findIndex((card) => card.id === active.id);
-    const newIndex = cards.findIndex((card) => card.id === over.id);
-
-    if (oldIndex === -1 && newIndex === -1) return;
-
-    const newCardsOrder = arrayMove(cards, oldIndex, newIndex);
-    setCards(newCardsOrder);
+    queryClient.setQueryData(['column-cards', columnId], (prev: Card) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        cards: newCardsOrder,
+      };
+    });
 
     await cardOrdersTable.put({ columnId, order: newCardsOrder.map((c) => c.id) });
   };
@@ -84,33 +67,41 @@ export default function DashboardColumn({ columnId, columnTitle }: ColumnType) {
     })
   );
 
+  const activeCard = data?.cards.find((card) => card.id.toString() === activeId) ?? null;
+
   return (
-    <div className="border-gray200 w-full shrink-0 overflow-y-scroll border-b border-solid px-5 py-[18px] lg:h-full lg:w-[354px] lg:border-r lg:border-b-0">
+    <div className="border-gray200 w-full shrink-0 overflow-y-scroll border-b border-solid px-5 pb-4.5 lg:h-full lg:w-[354px] lg:border-r lg:border-b-0">
       <div>
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center justify-center gap-2">
-            <div className="bg-violet h-2 w-2 rounded-full" />
-            <h2 className="text-bold16 text-black">{columnTitle}</h2>
-            <span className="bg-gray200 text-medium12 text-gray500 ml-1 flex items-center justify-center rounded-sm px-1.5 py-[3px]">
-              {totalCounts}
-            </span>
+        <div className="bg-gray100 sticky top-0 z-1 py-4.5">
+          <div className="mb-1.5 flex items-center justify-between">
+            <div className="flex items-center justify-center gap-2">
+              <div className="bg-violet h-2 w-2 rounded-full" />
+              <h2 className="text-bold16 text-black">{columnTitle}</h2>
+              <span className="bg-gray200 text-medium12 text-gray500 ml-1 flex items-center justify-center rounded-sm px-1.5 py-[3px]">
+                {data?.totalCount ?? 0}
+              </span>
+            </div>
+            <ColumnSettingList columnId={columnId} columnTitle={columnTitle} />
           </div>
-          <ColumnSettingList columnId={columnId} columnTitle={columnTitle} />
+          <AddCardBtn columnId={columnId} />
         </div>
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
-          <SortableContext items={cards} strategy={verticalListSortingStrategy}>
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+          onDragStart={handleDragStart}
+          sensors={sensors}
+        >
+          <SortableContext items={data?.cards ?? []} strategy={verticalListSortingStrategy}>
             <div className="flex w-full flex-col gap-2 md:gap-4">
-              <AddCardBtn columnId={columnId} getCards={getCards} />
-              {cards.map((card) => (
-                <SortableCard
-                  key={card.id}
-                  card={card}
-                  columnTitle={columnTitle}
-                  getCards={getCards}
-                />
+              {data?.cards.map((card) => (
+                <SortableCard key={card.id} card={card} columnTitle={columnTitle} />
               ))}
             </div>
           </SortableContext>
+
+          <DragOverlay>
+            {activeCard ? <SortableCard card={activeCard} columnTitle={columnTitle} /> : null}
+          </DragOverlay>
         </DndContext>
       </div>
     </div>

@@ -4,9 +4,11 @@ import { postDashboardCardImage } from './action';
 import checkAllFormComplete from '@/utils/checkAllFormComplete';
 import formatDateTime, { parseDateTime } from '@/utils/formatDateTime';
 import DEFAULT_CARD_IMAGE from '@/constants/image/defaultCardImage';
-import EXTERNAL_API from '@/constants/api/external';
-import { CardType } from '../Dashboard/DashboardCard/DashboardCard';
-import { apiClient } from '@/lib/apiClient';
+import { useManageColumnCards } from '@/querys/dashboard/columnCardQuery';
+import { Card } from '../Dashboard/type';
+import UserBadge from '../UserBadge/UserBadge';
+import ColumnName from '../ColumnName/ColumnName';
+import { useDashboardStore } from '@/store/useDashboardStore';
 
 interface ToDoData {
   title: string;
@@ -26,8 +28,7 @@ export default function useToDoData(
   columnId: number,
   dashboardId: number,
   onClose: () => void,
-  getCards: (id?: number) => void,
-  card?: CardType
+  card?: Card
 ) {
   const [toDoData, setToDoData] = useState<ToDoData>(INITIAL_TO_DO_VALUE);
   const [assigneeUser, setAssigneeUser] = useState<DropdownItem>({
@@ -39,6 +40,9 @@ export default function useToDoData(
     value: '',
   });
   const [tags, setTags] = useState<string[]>(card?.tags ?? []);
+
+  const columns = useDashboardStore((s) => s.dashboardColumns);
+  const members = useDashboardStore((s) => s.members);
 
   useEffect(() => {
     if (card) {
@@ -58,8 +62,8 @@ export default function useToDoData(
     description: toDoData.description,
     dueDate: formatDateTime(toDoData.dueDate),
     dashboardId,
-    assigneeUserId: assigneeUser.id,
-    columnId: card ? columnName.id : columnId,
+    assigneeUserId: Number(assigneeUser.id),
+    columnId: card ? Number(columnName.id) : columnId,
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -102,33 +106,56 @@ export default function useToDoData(
 
   const isFormComplete = checkAllFormComplete(data) && tags.length !== 0;
 
-  const handleToDoSubmit = async () => {
+  const payload = {
+    ...data,
+    tags,
+    imageUrl: toDoData.imageUrl ?? DEFAULT_CARD_IMAGE,
+  };
+
+  const { manageCardMutation } = useManageColumnCards({ payload, card });
+
+  const handleToDoSubmit = () => {
     if (!isFormComplete) return;
 
-    try {
-      const url: string = card
-        ? `${EXTERNAL_API.CARDS.ROOT}/${card.id}`
-        : `${EXTERNAL_API.CARDS.ROOT}`;
-      const method = card ? apiClient.put<{ columnId: number }> : apiClient.post;
-
-      await method(url, {
-        ...data,
-        tags,
-        imageUrl: toDoData.imageUrl ?? DEFAULT_CARD_IMAGE,
-      });
-
-      setToDoData(INITIAL_TO_DO_VALUE);
-      setTags([]);
-
-      onClose();
-      getCards();
-    } catch (err) {
-      console.error(err);
-    }
+    manageCardMutation()
+      .then(() => {
+        setToDoData(INITIAL_TO_DO_VALUE);
+        setTags([]);
+        onClose();
+      })
+      .catch((err) => console.error(err));
   };
+
+  const memberList = members.map((member) => ({
+    value: member.nickname,
+    id: member.userId,
+    renderItem: () => (
+      <UserBadge
+        size={26}
+        profile={member.profileImageUrl}
+        userName={member.nickname}
+        gap={6}
+        fontSize="R14"
+      />
+    ),
+  }));
+
+  const memberSelectedItem = memberList.find((member) => member.id === card?.assignee?.id);
+
+  const columnList = columns.map((column) => ({
+    value: column.title,
+    id: column.id,
+    renderItem: () => <ColumnName columnName={column.title} />,
+  }));
+
+  const columnSelectedItem = columnList.find((column) => column.id === columnId);
 
   return {
     toDoData,
+    memberList,
+    columnList,
+    memberSelectedItem,
+    columnSelectedItem,
     dueDate: toDoData.dueDate,
     image: toDoData.imageUrl,
     isFormComplete,
